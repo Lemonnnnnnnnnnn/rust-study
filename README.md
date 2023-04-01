@@ -15,7 +15,7 @@
   - js的枚举类：Ordering.a
   - rust的枚举类：Ordering::a
 - 所有的格式转换都用 parse() 来做，依靠自动推断
-- isize、usize : arch平台的有符号数和无符号数
+- isize、usize : arr.len()的返回类型
 - panic : 特有名词，程序因为“恐慌”而崩溃退出
 
 
@@ -80,7 +80,225 @@ for element in a {
 }
 ```
 
-## for_each , |_|
+### 对象
+
+```rust
+struct User {
+    active: bool,
+    username: String,
+    email: String,
+    sign_in_count: u64,
+}
+
+fn main() {
+    let user1 = User {
+        active: true,
+        username: String::from("someusername123"),
+        email: String::from("someone@example.com"),
+        sign_in_count: 1,
+    };
+}
+```
+
+和ES6语法相当相似：
+
+```rust
+fn main() {
+    let user2 = User {
+        email: String::from("another@example.com"),
+        ..user1  // rust中 ..必须放在最后
+    };
+    
+}
+
+fn build_user(email: String, username: String) -> User {
+    User {
+        active: true,
+        username,
+        email,
+        sign_in_count: 1,
+    }
+}
+
+```
+
+## 所有权
+
+栈是有序的，堆是无序的，堆通过查找内存中的可用空间并放入，其增加了一个搜索操作。
+
+**所有权**主要是为了管理堆，比如减少堆中的重复数据（这在其他语言中被称为垃圾回收）。
+
+**所有权规则：**
+
+1. Rust 中的每一个值都有一个 所有者（owner）
+。
+1. 值在任一时刻有且只有一个所有者。
+2. 当所有者（变量）离开作用域，这个值将被丢弃。
+
+
+变量的owner发生了改变，如果再去访问原来的变量则会发生错误。为了避免其他变量和函数获取原有变量的所有权，可以使用 `&引用` 符号直接来访问其他变量的值而不用先获取该变量的所有权。
+
+**赋值：**
+
+```rust
+// correct
+fn owner() {
+    let x = 5;
+    let y = x;
+
+    println!("x = {x}, y = {y}");
+}
+
+// wrong
+
+fn main() {
+  let s1 = String::from("hello");
+  let s2 = s1;
+  println!("s1 = {}, s2 = {}", s1, s2);
+
+}
+
+// correct
+fn main() {
+  let s1 = String::from("hello");
+  let s2 = s1.clone();
+  println!("s1 = {}, s2 = {}", s1, s2);
+
+}
+```
+
+**函数**
+
+```rust
+//wrong
+fn scope() {
+    let s = String::from("hello");
+    // s 进入作用域
+    takes_ownership(s);// s 的值移动到函数里 ...
+
+    println!("{s}");
+}
+
+fn takes_ownership(s: String){
+    
+}
+
+
+//correct
+fn scope() {
+    let s = String::from("hello");
+    // s 进入作用域
+     takes_ownership(&s);
+
+    println!("{s}");
+}
+
+fn takes_ownership(s: &String) -> usize{
+    s.len()
+}
+```
+
+**修改**
+
+```rust
+
+// wrong
+fn main() {
+    let mut s = String::from("hello");
+    change(&s);
+}
+
+fn change(some_string: &String) {
+    some_string.push_str(", world");
+}
+
+// corrent
+fn main() {
+    let mut s = String::from("hello");
+    change(&mut s);
+}
+
+fn change(some_string: &mut String) {
+    some_string.push_str(", world");
+}
+
+```
+
+变量只能被一个人借走（不允许两个写者）：
+
+```rust
+fn main() {
+    let mut s = String::from("hello");
+
+    let r1 = &mut s;
+    let r2 = &mut s; // 报错
+
+    println!("{}, {}", r1, r2);
+}
+
+```
+
+读得时候不能写：
+
+```rust
+fn main() {
+    let mut s = String::from("hello");
+
+    let r1 = &s; // 没问题
+    let r2 = &s; // 没问题
+    let r3 = &mut s; // 编译错误
+
+    println!("{}, {}, and {}", r1, r2, r3);
+}
+
+```
+
+作用域的范围到变量的最后一次引用位置为止，以下这段函数是正确的，因为 `r1,r2` 两个读者退出了作用域：
+
+```rust
+// wrong
+fn main() {
+    let mut s = String::from("hello");
+
+    let r1 = &s; // 没问题
+    let r2 = &s; // 没问题
+    println!("{} and {}", r1, r2);
+    // 此位置之后 r1 和 r2 不再使用
+
+    let r3 = &mut s; // 没问题
+    println!("{}", r3);
+}
+
+```
+
+js中的闭包在rust中是不允许的，无法通过编译：
+
+```rust
+//wrong
+fn main() {
+    let reference_to_nothing = dangle();
+}
+
+// 虽然s在函数体结束后就应该被释放，但函数却抛出它给外部函数
+fn dangle() -> &String {
+    let s = String::from("hello");
+
+    &s
+}
+
+// current
+
+fn main() {
+    let string = no_dangle();
+}
+
+// 返回一个新的值给外部函数，而非一个指针，指向会在函数结束后被释放的值。
+fn no_dangle() -> String {
+    let s = String::from("hello");
+
+    s
+}
+```
 
 
 # 易错点
@@ -167,3 +385,17 @@ let condition = true;
 let number = if condition { 5 } else { 6 };
 let number = if condition { 5 } else { "six" }; // 类型不兼容
 ```
+
+字符串：
+
+```rust
+    let s : str = "Hello, world!"; // 编译失败 
+    let s1 = "Hello, world!"; // s的类型推断是&str，它是一个引用，它不可改变
+    let s2 = String::from("Hello, world!"); // s的类型是String，它是一个值，它可被改变
+    let s3 = &s2[..]; // 将s2作为一个整体slice返回，他的类型推断是&str
+```
+
+为什么要区分出 `String` 和 `&str` ？单单是 `String` 可变，`&str` 不可变并不是一个好理由。因为 `let` 与 `let mut` 已经帮我们对变量是否可以被改变做了处理。
+
+试想一下，如果没有 `&str` ，只有 `String` ，那么通过 `slice` 切出的子字符串同样是 `String` ，也就是说 `String` 可以派生出许多其他的可变类型，这违反了 rust 内存绝对安全的原则。
+

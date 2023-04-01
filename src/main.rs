@@ -7,7 +7,7 @@ fn main() {
     println!("fib5 = {res}");
 }
 
-fn guess_number(){
+fn guess_number() {
     println!("Guess the number!");
 
     let secret_number = rand::thread_rng().gen_range(1..=100);
@@ -24,12 +24,12 @@ fn guess_number(){
             .expect("Failed to read line");
 
         // let guess: u32 = guess.trim().parse().expect("please type a number");
-        let guess: u32 = match guess.trim().parse(){
+        let guess: u32 = match guess.trim().parse() {
             Ok(num) => num,
-            Err(_)=> {
+            Err(_) => {
                 println!("please input number");
-                continue
-            } ,
+                continue;
+            }
         };
 
         println!("You guessed : {guess}");
@@ -39,12 +39,11 @@ fn guess_number(){
             Ordering::Equal => {
                 println!("You win!");
                 break;
-            } ,
+            }
             Ordering::Greater => println!("Too big!"),
         }
     }
 }
-
 
 fn fib(n: u32) -> u32 {
     let mut a = 1;
@@ -56,4 +55,20 @@ fn fib(n: u32) -> u32 {
         b = c;
     });
     c
+}
+
+fn main() {
+    let mut s = String::from("hello");
+    change(&mut s);
+}
+
+fn change(some_string: &mut String) {
+    some_string.push_str(", world");
+}
+
+
+fn test(){
+    let s = "Hello, world!";
+    let s = String::from("Hello, world!");
+    let s1 = &s[..];
 }

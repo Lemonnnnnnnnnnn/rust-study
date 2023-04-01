@@ -3,6 +3,11 @@ use std::cmp::Ordering;
 use std::io;
 
 fn main() {
+    let res = fib(5).to_string();
+    println!("fib5 = {res}");
+}
+
+fn guess_number(){
     println!("Guess the number!");
 
     let secret_number = rand::thread_rng().gen_range(1..=100);
@@ -38,4 +43,17 @@ fn main() {
             Ordering::Greater => println!("Too big!"),
         }
     }
+}
+
+
+fn fib(n: u32) -> u32 {
+    let mut a = 1;
+    let mut b = 1;
+    let mut c = 0;
+    (0..n).for_each(|_| {
+        c = a + b;
+        a = b;
+        b = c;
+    });
+    c
 }

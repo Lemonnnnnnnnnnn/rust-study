@@ -300,6 +300,198 @@ fn no_dangle() -> String {
 }
 ```
 
+## 打印方法
+
+```rust
+#[derive(Debug)]
+struct Rectangle {
+    width: u32,
+    height: u32,
+}
+
+fn main() {
+    let scale = 2;
+    let rect1 = Rectangle {
+        width: dbg!(30 * scale),
+        height: 50,
+    };
+
+    dbg!(&rect1);
+}
+
+```
+
+```rust
+#[derive(Debug)]
+struct Rectangle {
+    width: u32,
+    height: u32,
+}
+
+fn test() {
+    let rect1 = Rectangle {
+        width: 30,
+        height: 50,
+    };
+
+    println!("rect1 is {:#?}", rect1);
+}
+
+```
+
+## 结构体 
+
+rust中没有class，用struct执行class的功能。
+
+**和js不同，要在对象中定义函数，需要使用`impl`关键字：**
+
+```rust
+#[derive(Debug)]
+struct Rectangle {
+    width: u32,
+    height: u32,
+}
+
+impl Rectangle {
+    fn area(&self) -> u32 { // 默认将对象自身的引用作为第一个参数传入
+        self.width * self.height
+    }
+}
+
+fn main() {
+    let rect1 = Rectangle {
+        width: 30,
+        height: 50,
+    };
+
+    println!(
+        "The area of the rectangle is {} square pixels.",
+        rect1.area()
+    );
+}
+
+```
+
+**静态方法**
+
+使用`struct.fn()` 会自动将对象作为函数的第一个参数引入，使用 `struct::fn()` 则不会：
+
+```rust
+#[derive(Debug)]
+struct Rectangle {
+    width: u32,
+    height: u32,
+}
+
+impl Rectangle {
+    fn generate_square(size: u32) -> Self {
+        Self { // Self即Rectangle，看看下面第一种生成结构体的方法，两者写法一致
+            width: size,
+            height: size,
+        }
+    }
+}
+fn main() {
+  // 这两种写法相同
+    let rect1 = Rectangle {
+        width: 30,
+        height: 30,
+    };
+
+    let rect2 = Rectangle::generate_square(30);
+
+}
+```
+
+## 枚举
+
+枚举 = struct + interface.
+
+你可以单纯将枚举当作某一类型的常量来使用，这使它起到了接口的作用：
+
+```rust
+fn main() {
+    enum IpAddrKind {
+        V4,
+        V6,
+    }
+
+    struct IpAddr {
+        kind: IpAddrKind, // 将枚举当作接口类型来使用
+        address: String,
+    }
+
+    let home = IpAddr {
+        kind: IpAddrKind::V4, // 分配枚举常量
+        address: String::from("127.0.0.1"),
+    };
+
+    let loopback = IpAddr {
+        kind: IpAddrKind::V6,
+        address: String::from("::1"),
+    };
+}
+
+我们也可以给枚举值分配一个变量，这使枚举的用法更像struct，比如：
+
+```rust
+fn main() {
+    enum IpAddr {
+        V4(u8, u8, u8, u8),
+        V6(String),
+    }
+
+    let home = IpAddr::V4(127, 0, 0, 1);
+
+    let loopback = IpAddr::V6(String::from("::1"));
+}
+```
+
+给枚举值也可以接受结构体：
+
+
+```Rust
+fn main() {
+  struct Ipv4Addr {
+      // --snip--
+  }
+
+  struct Ipv6Addr {
+      // --snip--
+  }
+
+  enum IpAddr {
+      V4(Ipv4Addr),
+      V6(Ipv6Addr),
+  }
+}
+```
+
+## 空值、枚举与match（待完善）
+
+rust中对空值的定义非常的严格，因为空值是引起运行错误的一个重要来源。因此其作出规定，只有一种变量可能为空，那就是 `Option` 型变量。
+
+```rust
+#![allow(unused)]
+fn main() {
+  enum Option<T> {
+      None,
+      Some(T),
+  }
+}
+
+fn main() {
+    let some_number = Some(5); // 推断类型为Option<number>
+    let some_char = Some('e'); // 推断类型为Option<char>
+
+    let absent_number: Option<i32> = None; // 必须提前定义空值的类型
+}
+```
+
+要使用 `Option<T>` 枚举对象，必须提前将其转换为 `T` ，即**非空值**来运行。
+
+总结：所有的空值都保存在 `Option` 枚举对象中，这给程序的运行带来了安全。
+
 
 # 易错点
 

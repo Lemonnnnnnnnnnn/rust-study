@@ -473,7 +473,7 @@ fn main() {
 
 ### 空值与Option
 
-rust中对空值的定义非常的严格，因为空值是引起运行错误的一个重要来源。因此其作出规定，只有一种变量可能为空，那就是 `Option` 型变量。
+rust中对空值**null**的定义非常的严格，因为空值是引起运行错误的一个重要来源。因此其作出规定，只有一种变量可能为空，那就是 `Option` 型变量。
 
 ```rust
 #![allow(unused)]
@@ -494,9 +494,8 @@ fn main() {
 
 要使用 `Option<T>` 枚举对象，必须提前将其转换为 `T` ，即**非空值**来运行。
 
-总结：所有的空值都保存在 `Option` 枚举对象中，这给程序的运行带来了安全。
+总结：所有的 `null` 都保存在 `Option` 枚举对象中，这给程序的运行带来了安全。
 
-**疑问：函数、match 可能返回空元组()，是因为元组这个数据结果比较特别吗？**
 
 ### match
 
@@ -571,7 +570,7 @@ fn main() {
         }
     }
 
-    let five = Some(5);
+    let five = Some(5); // 因为非常常用，所以Option 的 Some 和 None 可以直接使用，相当于预置了 use Option;
     let six = plus_one(five);
     let none = plus_one(None);
 }
@@ -597,7 +596,7 @@ fn main() {
 
 ```
 
-你可以使用match来匹配数字，但我们无法穷举数字，因此我们可以使用一种 **通配模式**：
+数字也是一种枚举值，你可以使用match来匹配数字，但我们无法穷举数字，因此我们可以使用一种 **通配模式**：
 
 ```rust
 fn main() {
@@ -638,6 +637,57 @@ fn main() {
 **关于match的返回值：**
 
 > Rust要求match的**每个分支返回值类型必须相同，且如果是一个单独的match表达式而不是赋值给变量时，每个分支必须返回 () 类型**。 
+
+### if let
+
+因为rust中没有null，所以判断是否为空不能使用 `if,else` 语句来处理，我们只能用 `match` :
+
+```rust
+fn main() {
+    let config_max = Some(3u8);
+    match config_max {
+        Some(max) => println!("The maximum is configured to be {}", max),
+        _ => (), // 处理none
+    }
+}
+```
+
+为了处理这种常用场景，rust提供了一种语法糖 ： `if let` :
+
+```rust
+fn main() {
+    let config_max = Some(3u8);
+    if let Some(max) = config_max {
+        println!("The maximum is configured to be {}", max);
+    }
+}
+```
+解析：
+
+```rust
+let config_max = Some(3u8);
+// 根据自动推断等于
+let config_max : Option<u8> = Some(3u8);
+```
+
+而 `config_max : Option<u8>` 可以等于 `Some<u8>` 或 `None` 。于是我们可以把上面的代码写的完整一些：
+
+```rust
+fn main() {
+    let config_max : Option<u8> = Some(3u8);
+    if let Some(max) = config_max {
+        println!("The maximum is configured to be {}", max);
+    }else if let None = config_max {
+
+    }
+}
+```
+
+- 如果 `if let Some(max) = config_max` 赋值成功，则说明 `config_max` 的枚举类型是 `Some` 。
+- 如果 `if let None = config_max` 赋值成功，则说明 `config_max` 的枚举类型是 `None` 。
+从而执行相应的条件语句分支代码。
+
+
 
 # 易错点
 

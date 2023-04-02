@@ -403,7 +403,8 @@ fn main() {
 }
 ```
 
-## 枚举
+
+## 枚举、空值与match
 
 枚举 = struct + interface.
 
@@ -467,7 +468,10 @@ fn main() {
 }
 ```
 
-## 空值、枚举与match（待完善）
+我们经常会在[match](#match)中使用枚举绑定的值。
+
+
+### 空值与Option
 
 rust中对空值的定义非常的严格，因为空值是引起运行错误的一个重要来源。因此其作出规定，只有一种变量可能为空，那就是 `Option` 型变量。
 
@@ -492,6 +496,148 @@ fn main() {
 
 总结：所有的空值都保存在 `Option` 枚举对象中，这给程序的运行带来了安全。
 
+**疑问：函数、match 可能返回空元组()，是因为元组这个数据结果比较特别吗？**
+
+### match
+
+match基本使用方法：`=>` 指向返回结果 
+
+```rust
+enum Coin {
+    Penny,
+    Nickel,
+    Dime,
+    Quarter,
+}
+
+fn value_in_cents(coin: Coin) -> u8 {
+    match coin {
+        Coin::Penny => {
+            1
+        },
+        Coin::Nickel => 5,
+        Coin::Dime => 10,
+        Coin::Quarter => 25,
+    }
+}
+
+fn main() {}
+
+```
+
+在match中使用枚举变量绑定的值：
+
+```rust
+#[derive(Debug)]
+enum UsState {
+    Alabama,
+    Alaska,
+    // --snip--
+}
+
+enum Coin {
+    Penny,
+    Nickel,
+    Dime,
+    Quarter(UsState),
+}
+
+fn value_in_cents(coin: Coin) -> u8 {
+    match coin {
+        Coin::Penny => 1,
+        Coin::Nickel => 5,
+        Coin::Dime => 10,
+        Coin::Quarter(state) => {
+            println!("State quarter from {:?}!", state);
+            25
+        }
+    }
+}
+
+fn main() {
+    value_in_cents(Coin::Quarter(UsState::Alaska));
+}
+
+```
+
+match 与 Option 配合使用：
+
+```rust
+fn main() {
+    fn plus_one(x: Option<i32>) -> Option<i32> {
+        match x {
+            None => None,
+            Some(i) => Some(i + 1),
+        }
+    }
+
+    let five = Some(5);
+    let six = plus_one(five);
+    let none = plus_one(None);
+}
+
+```
+
+rust 中的 match 是穷尽的，你必须在match中对所有的枚举值进行处理：
+
+```rust
+// 没有处理 Option 的none枚举值，因此无法通过编译
+
+fn main() {
+    fn plus_one(x: Option<i32>) -> Option<i32> {
+        match x {
+            Some(i) => Some(i + 1),
+        }
+    }
+
+    let five = Some(5);
+    let six = plus_one(five);
+    let none = plus_one(None);
+}
+
+```
+
+你可以使用match来匹配数字，但我们无法穷举数字，因此我们可以使用一种 **通配模式**：
+
+```rust
+fn main() {
+    let dice_roll = 9;
+    match dice_roll {
+        3 => add_fancy_hat(),
+        7 => remove_fancy_hat(),
+        others => move_player(others), // 最后一个分支匹配其他数字
+    }
+
+    fn add_fancy_hat() {}
+    fn remove_fancy_hat() {}
+    fn move_player(num_spaces: u8) {}
+}
+
+```
+
+通配模式的变量可以任意选择，但其中有一个关键字比较特殊 `_` ，它表示不使用匹配到的值。
+
+```rust
+fn main() {
+    let dice_roll = 9;
+    match dice_roll {
+        3 => add_fancy_hat(),
+        7 => remove_fancy_hat(),
+        _ => move_player(_), // 报错
+        // in expressions, `_` can only be used on the left-hand side of an assignment
+        // `_` not allowed here
+    }
+
+    fn add_fancy_hat() {}
+    fn remove_fancy_hat() {}
+    fn move_player(num_spaces: u8) {}
+}
+
+```
+
+**关于match的返回值：**
+
+> Rust要求match的**每个分支返回值类型必须相同，且如果是一个单独的match表达式而不是赋值给变量时，每个分支必须返回 () 类型**。 
 
 # 易错点
 

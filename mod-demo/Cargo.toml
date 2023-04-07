@@ -1,5 +1,5 @@
 [package]
-name = "guess_number"
+name = "mod-demo"
 version = "0.1.0"
 edition = "2021"
 

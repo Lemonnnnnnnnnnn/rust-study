@@ -1,5 +1,10 @@
 mod entity;
+mod student;
+
+use entity::farmer;
 
 fn main() {
-    entity::farmer::say();
+    student::say();
+    farmer::say();
+    entity::teacher::call_student();
 }

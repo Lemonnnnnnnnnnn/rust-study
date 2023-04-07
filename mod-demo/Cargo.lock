@@ -20,17 +20,17 @@ dependencies = [
 ]
 
 [[package]]
-name = "guess_number"
-version = "0.1.0"
-dependencies = [
- "rand",
-]
-
-[[package]]
 name = "libc"
 version = "0.2.140"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "99227334921fae1a979cf0bfdfcc6b3e5ce376ef57e16fb6fb3ea2ed6095f80c"
+
+[[package]]
+name = "mod-demo"
+version = "0.1.0"
+dependencies = [
+ "rand",
+]
 
 [[package]]
 name = "ppv-lite86"

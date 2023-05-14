@@ -1,0 +1,6 @@
+[workspace]
+
+members = [
+    "printer",
+    "log_printer"
+]

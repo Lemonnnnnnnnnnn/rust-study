@@ -35,7 +35,6 @@ mod test{
     use super::*;
     
     #[test]
-    #[ignore]
     fn test(){
         run();
     }

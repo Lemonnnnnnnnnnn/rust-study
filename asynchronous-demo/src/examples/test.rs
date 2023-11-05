@@ -1,31 +1,40 @@
+#[derive(Clone)]
 pub struct A {}
 
 pub struct B {
-    pub name : String
+    pub name: String,
 }
 
 impl A {
-    pub async fn make_b(&self) -> B {
-        B {
-            name : String::from("test")
-        }
+    pub async fn make_b(&self) -> i32 {
+        1
     }
 }
 
 #[cfg(test)]
 mod test {
-    use tokio::runtime::Runtime;
+    use std::sync::Arc;
 
     use super::*;
 
     #[tokio::test]
     async fn test() {
-        let a = A {};
-        let b = a.make_b();
+        let a = Arc::new(A {});
+        let a2 = Arc::new(A {});
+        let v = vec![a, a2];
 
-        let rt = Runtime::new().unwrap();
-        let b = rt.block_on(b);
+        // let b: Vec<_> = v.into_iter().map(|a| async { a.make_b() }).collect();
+        let b: Vec<_> = v.into_iter().map(|a| {
+            let a_clone = Arc::clone(&a);
+            async move {
+                a_clone.make_b().await
+            }
+            }).collect::<Vec<_>>();
 
-        println!("{}", b.name);
+        for i in b {
+            let aa = i.await;
+            println!("{}", aa);
+        }
+
     }
 }

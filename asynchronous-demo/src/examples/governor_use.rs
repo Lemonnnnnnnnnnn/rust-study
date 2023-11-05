@@ -11,7 +11,6 @@ async fn run_task(num: i32) -> i32 {
 
 async fn main()-> Vec<i32> 
 {
-
     const RATE_LIMIT: u32 = 1;
     let governor = Arc::new(RateLimiter::direct(Quota::per_second(
         NonZeroU32::new(RATE_LIMIT).unwrap(),

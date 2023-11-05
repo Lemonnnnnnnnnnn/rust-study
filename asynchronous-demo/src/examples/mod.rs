@@ -1,7 +1,10 @@
 pub mod base_use;
 pub mod await_use;
 pub mod await_tokio_use;
-pub mod stream_use;
+pub mod async_custom_stream;
 pub mod governor_use;
 pub mod tokio_spawn_use;
 pub mod test;
+pub mod async_join_all;
+pub mod async_ownership_thread;
+pub mod async_stream;
